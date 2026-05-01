@@ -1,0 +1,76 @@
+---
+title: "DSPN_Statistical_Analysis"
+author: "Gavin Kelly"
+output: html_document
+date: "2026-05-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(lubridate)
+library(tidyr)
+library(psych)
+library(ggplot2)
+library(ggdist)
+library(ggridges)
+library(forcats)
+library(reshape2)
+library(cowplot)
+library(ggpubr)
+library(lme4)
+library(lmerTest)
+library(sjstats)
+library(gt)
+library(webshot2)
+```
+
+## Loading Data
+
+```{r}
+# ema_lead <- read.csv("ema_lead.csv")
+```
+
+## Technique 1: LMER Tests
+
+### Location
+
+```{r}
+ema_lead$location <- relevel(factor(ema_lead$location), ref = "home")
+model_location <- lmer(prop_alc_responses ~ location + (1 | subject), data = ema_lead)
+anova(model_location)
+summary(model_location)
+```
+
+### Social Context
+
+```{r}
+model_social <- lmer(prop_alc_responses ~ social_context_overall + (1 | subject), data = ema_lead)
+anova(model_social)
+summary(model_social)
+```
+
+### Time of Day
+
+```{r}
+model_time <- lmer(prop_alc_responses ~ time_of_day + (1 | subject), data = ema_lead)
+anova(model_time)
+summary(model_time)
+```
+
+### Day of Week
+
+```{r}
+model_day <- lmer(prop_alc_responses ~ day_of_week + (1 | subject), data = ema_lead)
+anova(model_day)
+summary(model_day)
+```
+
+
+
+
+
+
