@@ -1228,13 +1228,10 @@ cue_type_plot
 # Saving Data
 
 ```{r}
-DSPN_tidy_data <- k99_lead_data %>%
-  select(subject, session, day_number, prop_alc_responses,
-         prop_soda_responses, prop_diet_soda_responses, prop_juice_responses,
-         prop_energy_responses, prop_coffee_responses, prop_beer_responses,
-         prop_liquor_responses, prop_seltzer_responses, prop_wine_responses, 
-         day_of_week, social_context_overall, location, hour, prop_preference_reversals)
-# write.csv(DSPN_tidy_data, "DSPN_tidy_data.csv", row.names = F)
+DSPN_tidy_data <- k99_shared_data %>%
+  select(subject, session, trial, prop_alc_responses, 
+         day_of_week, social_context_overall, location, time, value_function, response, alc_image, soft_image)
+write.csv(DSPN_tidy_data, "DSPN_tidy_data.csv", row.names = F)
 ```
 
 
