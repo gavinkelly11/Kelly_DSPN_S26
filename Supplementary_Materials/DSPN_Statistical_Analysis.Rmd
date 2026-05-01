@@ -26,6 +26,7 @@ library(lmerTest)
 library(sjstats)
 library(gt)
 library(webshot2)
+library(sjPlot)
 ```
 
 ## Loading Data
@@ -39,10 +40,15 @@ library(webshot2)
 ### Location
 
 ```{r}
+# We use location as the reference because it has the most observations
 ema_lead$location <- relevel(factor(ema_lead$location), ref = "home")
 model_location <- lmer(prop_alc_responses ~ location + (1 | subject), data = ema_lead)
 anova(model_location)
 summary(model_location)
+tab_model(model_location, 
+          show.df = TRUE,       # Shows degrees of freedom
+          show.p = TRUE,        # Shows p-values
+          title = "Effect of Location on Alcohol Choices")
 ```
 
 ### Social Context
