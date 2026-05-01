@@ -1217,6 +1217,22 @@ soc_loc_heatmap
 ggsave("soc_loc_heatmap.jpeg", soc_loc_heatmap, device = "jpeg", width = 7, height = 5, dpi = 300)
 ```
 
+```{r}
+DSPN_figure1 <- ggpubr::ggarrange(
+  loc_drink_plot, soc_drinks_plot, hourly_type_plot, day_of_week_type_plot,
+  ncol = 2,
+  nrow = 2,
+  widths = c(2, 2),
+  labels = c("A", "B", "C", "D"),
+  font.label = list(size = 22, face = "bold"), # Optional formatting
+  label.x = 0,
+  label.y = 1
+)
+DSPN_figure1
+ggsave("DSPN_figure1.jpg", DSPN_figure1, width = 15, height = 13, dpi = 300)
+```
+
+
 # Saving Data
 
 ```{r}
@@ -1225,6 +1241,7 @@ DSPN_tidy_data <- k99_shared_data %>%
          day_of_week, social_context_overall, location, time, value_function, response, alc_image, soft_image)
 # write.csv(DSPN_tidy_data, "DSPN_tidy_data.csv", row.names = F)
 # write.csv(ema_lead, "ema_lead.csv", row.names = F)
+# write.csv(ema_long, "ema_long.csv", row.names = F)
 ```
 
 
