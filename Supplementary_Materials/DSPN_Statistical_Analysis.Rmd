@@ -33,6 +33,7 @@ library(sjPlot)
 
 ```{r}
 # ema_lead <- read.csv("ema_lead.csv")
+# ema_long <- read.csv("ema_long.csv")
 ```
 
 ## Technique 1: LMER Tests
@@ -54,6 +55,7 @@ tab_model(model_location,
 ### Social Context
 
 ```{r}
+ema_lead$social_context_overall <- relevel(factor(ema_lead$social_context_overall), ref = "alone")
 model_social <- lmer(prop_alc_responses ~ social_context_overall + (1 | subject), data = ema_lead)
 anova(model_social)
 summary(model_social)
