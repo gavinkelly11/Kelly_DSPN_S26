@@ -160,4 +160,103 @@ anova(model_day_drink)
 ```
 
 
+### Principal Components Analysis
+
+```{r}
+ema_lead_clean <- ema_lead %>%
+  # drop_na() allows you to specify which columns must not have NAs
+  drop_na(prop_beer_responses, prop_wine_responses, prop_liquor_responses, prop_seltzer_responses,
+          prop_soda_responses, prop_diet_soda_responses, prop_juice_responses,
+          prop_energy_responses, prop_coffee_responses)
+ema_centered <- ema_lead_clean %>%
+  select(subject, 
+         prop_beer_responses, prop_wine_responses, prop_liquor_responses, prop_seltzer_responses,
+         prop_soda_responses, prop_diet_soda_responses, prop_juice_responses,
+         prop_energy_responses, prop_coffee_responses) %>% 
+  group_by(subject) %>%
+  mutate(across(starts_with("prop_"), ~ .x - mean(.x, na.rm = TRUE))) %>%
+  ungroup() %>%
+  select(-subject)
+pca_results <- prcomp(ema_centered, scale. = TRUE)
+```
+
+```{r}
+summary(pca_results)
+
+ggplot(data.frame(pc=1:9,var.exp=pca_results$sdev/sum(pca_results$sdev)),
+        aes(x=pc,y=var.exp)) + 
+    geom_point() + 
+    theme_light()
+pca_results$rotation
+
+# A Scree Plot is the best visual way to decide. 
+# Look for the "elbow" where the line flattens out.
+plot(pca_results, type = "l", main = "Scree Plot")
+round(pca_results$rotation, 2)
+# Extract the scores for the first 2 components and bind them back to your original data
+ema_lead_clean$PC1_Alcohol <- pca_results$x[, 1]
+ema_lead_clean$PC2_Vibe <- pca_results$x[, 2]
+```
+
+#### Using location to predict PC2
+
+```{r}
+ema_lead_clean$location <- relevel(factor(ema_lead_clean$location), ref = "home")
+model_vibe_loc <- lmer(PC2_Vibe ~ location + (1 | subject), data = ema_lead_clean)
+anova(model_vibe_loc)
+summary(model_vibe_loc)
+model_PC2_vibe_loc_plot <- emmip(model_vibe_loc, ~ location, CIs = TRUE) +
+  theme_cowplot() +
+  # We can customize the look of the line and points here
+  geom_line(color = "#4575b4", linewidth = 1.2) + 
+  geom_point(color = "#4575b4", size = 3) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  
+  # Update the labels to reflect what the PCA component actually means
+  labs(title = "Estimated PC2 'Vibe Shift' by Location",
+       subtitle = "Higher scores = Sipping/Formal; Lower scores = Casual/Active",
+       y = "Estimated PC2 Score", 
+       x = "Location")
+```
+
+```{r}
+# ggsave("model_PC2_vibe_loc_plot.jpeg", model_PC2_vibe_loc_plot, device = "jpeg", width = 9,
+#        height = 5.5, dpi = 300)
+```
+
+#### Using social context to predict PC2
+
+```{r}
+ema_lead_clean$social_context_overall <- relevel(factor(ema_lead_clean$social_context_overall), ref = "alone")
+model_vibe_soc <- lmer(PC2_Vibe ~ social_context_overall + (1 | subject), data = ema_lead_clean)
+anova(model_vibe_soc)
+summary(model_vibe_soc)
+model_PC2_vibe_soc_plot <- emmip(model_vibe_soc, ~ social_context_overall, CIs = TRUE) +
+  theme_cowplot() +
+  # We can customize the look of the line and points here
+  geom_line(color = "#4575b4", linewidth = 1.2) + 
+  geom_point(color = "#4575b4", size = 3) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  
+  # Update the labels to reflect what the PCA component actually means
+  labs(title = "Estimated PC2 'Vibe Shift' by Social Context",
+       subtitle = "Higher scores = Sipping/Formal; Lower scores = Casual/Active",
+       y = "Estimated PC2 Score", 
+       x = "Social Context")
+```
+
+```{r}
+# ggsave("model_PC2_vibe_soc_plot.jpeg", model_PC2_vibe_soc_plot, device = "jpeg", width = 9,
+#        height = 5.5, dpi = 300)
+```
+
+
+
+
+
+
+
+
+
+
 
