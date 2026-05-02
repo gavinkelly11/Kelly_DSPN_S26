@@ -182,17 +182,8 @@ pca_results <- prcomp(ema_centered, scale. = TRUE)
 
 ```{r}
 summary(pca_results)
-
-ggplot(data.frame(pc=1:9,var.exp=pca_results$sdev/sum(pca_results$sdev)),
-        aes(x=pc,y=var.exp)) + 
-    geom_point() + 
-    theme_light()
-pca_results$rotation
-
-# A Scree Plot is the best visual way to decide. 
-# Look for the "elbow" where the line flattens out.
 plot(pca_results, type = "l", main = "Scree Plot")
-round(pca_results$rotation, 2)
+round(pca_results$rotation[1:9, 1:2], 2)
 # Extract the scores for the first 2 components and bind them back to your original data
 ema_lead_clean$PC1_Alcohol <- pca_results$x[, 1]
 ema_lead_clean$PC2_Vibe <- pca_results$x[, 2]
@@ -214,7 +205,7 @@ model_PC2_vibe_loc_plot <- emmip(model_vibe_loc, ~ location, CIs = TRUE) +
   
   # Update the labels to reflect what the PCA component actually means
   labs(title = "Estimated PC2 'Vibe Shift' by Location",
-       subtitle = "Higher scores = Sipping/Formal; Lower scores = Casual/Active",
+       subtitle = "Higher scores = High Alcohol Content/Juice; Lower scores = Low Alcohol Content/High Caffeine",
        y = "Estimated PC2 Score", 
        x = "Location")
 ```
@@ -240,7 +231,7 @@ model_PC2_vibe_soc_plot <- emmip(model_vibe_soc, ~ social_context_overall, CIs =
   
   # Update the labels to reflect what the PCA component actually means
   labs(title = "Estimated PC2 'Vibe Shift' by Social Context",
-       subtitle = "Higher scores = Sipping/Formal; Lower scores = Casual/Active",
+       subtitle = "Higher scores = High Alcohol Content/Juice; Lower scores = Low Alcohol Content/High Caffeine",
        y = "Estimated PC2 Score", 
        x = "Social Context")
 ```
