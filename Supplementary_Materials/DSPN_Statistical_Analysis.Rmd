@@ -26,7 +26,6 @@ library(lmerTest)
 library(sjstats)
 library(gt)
 library(webshot2)
-library(sjPlot)
 ```
 
 ## Loading Data
@@ -45,11 +44,7 @@ library(sjPlot)
 ema_lead$location <- relevel(factor(ema_lead$location), ref = "home")
 model_location <- lmer(prop_alc_responses ~ location + (1 | subject), data = ema_lead)
 anova(model_location)
-summary(model_location)
-tab_model(model_location, 
-          show.df = TRUE,       # Shows degrees of freedom
-          show.p = TRUE,        # Shows p-values
-          title = "Effect of Location on Alcohol Choices")
+# summary(model_location)
 ```
 
 ### Social Context
@@ -58,13 +53,24 @@ tab_model(model_location,
 ema_lead$social_context_overall <- relevel(factor(ema_lead$social_context_overall), ref = "alone")
 model_social <- lmer(prop_alc_responses ~ social_context_overall + (1 | subject), data = ema_lead)
 anova(model_social)
-summary(model_social)
+# summary(model_social)
 ```
 
 ### Time of Day
 
 ```{r}
-model_time <- lmer(prop_alc_responses ~ time_of_day + (1 | subject), data = ema_lead)
+ema_time_filtered <- ema_lead %>%
+  # Keep only the evening hours
+  filter(hour >= 15 & hour <= 22) %>%
+  # Convert the numeric hour to a formatted, ordered category
+  mutate(hour_factor = factor(paste0(hour, ":00"), 
+                              levels = paste0(15:22, ":00"), 
+                              ordered = TRUE))
+```
+
+
+```{r}
+model_time <- lmer(prop_alc_responses ~ hour_factor + (1 | subject), data = ema_time_filtered)
 anova(model_time)
 summary(model_time)
 ```
@@ -74,11 +80,75 @@ summary(model_time)
 ```{r}
 model_day <- lmer(prop_alc_responses ~ day_of_week + (1 | subject), data = ema_lead)
 anova(model_day)
-summary(model_day)
+# summary(model_day)
+```
+
+
+```{r}
+alc_colors <- c("Beer" = "#576c90", "Wine" = "#a9dff6", "Seltzer" = "#5d9ef6", "Liquor" = "#0d47a1")
+```
+
+
+## Technique 2: LMER tests with interaction term
+
+```{r}
+library(emmeans)
+```
+
+### Location * Drink Type
+
+```{r}
+model_loc_drink <- lmer(prop_drink_type_responses ~ location * drink_type + (1 | subject), 
+                        data = ema_long)
+emmip(model_loc_drink, drink_type ~ location, CIs = TRUE) +
+  theme_cowplot() +
+  scale_color_manual(values = alc_colors) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Estimated Alcohol Preferences by Location",
+       y = "Predicted Proportion", x = "Location", color = "Drink Type")
+```
+
+
+### Social Context * Drink Type
+
+```{r}
+model_soc_drink <- lmer(prop_drink_type_responses ~ social_context_overall * drink_type + (1 | subject), data = ema_long)
+emmip(model_soc_drink, drink_type ~ social_context_overall, CIs = TRUE) +
+  theme_cowplot() +
+  scale_color_manual(values = alc_colors) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Estimated Alcohol Preferences by Social Context",
+       y = "Predicted Proportion", x = "Social Context", color = "Drink Type")
 ```
 
 
 
+### Time of Day * Drink Type
+
+```{r}
+ema_long_filtered <- ema_long %>%
+  filter(hour >= 15 & hour <= 22) %>%
+  mutate(hour_factor = factor(paste0(hour, ":00"), 
+                              levels = paste0(15:22, ":00"), 
+                              ordered = TRUE))
+```
+
+
+```{r}
+model_time_drink <- lmer(prop_drink_type_responses ~ hour_factor * drink_type + (1 | subject), 
+                        data = ema_long_filtered)
+anova(model_time_drink)
+```
+
+
+
+### Day of Week * Drink Type
+
+```{r}
+model_day_drink <- lmer(prop_drink_type_responses ~ day_of_week * drink_type + (1 | subject), 
+                        data = ema_long)
+anova(model_day_drink)
+```
 
 
 

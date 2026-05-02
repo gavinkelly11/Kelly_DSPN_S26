@@ -968,8 +968,8 @@ hourly_type_plot
 ```
 
 ```{r}
-ggsave("hourly_type_plot.jpeg", hourly_type_plot, device = "jpeg", width = 7,
-       height = 4, dpi = 300)
+# ggsave("hourly_type_plot.jpeg", hourly_type_plot, device = "jpeg", width = 7,
+#        height = 4, dpi = 300)
 ```
 
 # Overall choices for alc by location
