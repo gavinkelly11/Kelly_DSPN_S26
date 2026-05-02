@@ -53,7 +53,7 @@ anova(model_location)
 ema_lead$social_context_overall <- relevel(factor(ema_lead$social_context_overall), ref = "alone")
 model_social <- lmer(prop_alc_responses ~ social_context_overall + (1 | subject), data = ema_lead)
 anova(model_social)
-# summary(model_social)
+summary(model_social)
 ```
 
 ### Time of Day
@@ -80,7 +80,7 @@ summary(model_time)
 ```{r}
 model_day <- lmer(prop_alc_responses ~ day_of_week + (1 | subject), data = ema_lead)
 anova(model_day)
-# summary(model_day)
+summary(model_day)
 ```
 
 
