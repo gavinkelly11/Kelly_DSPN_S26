@@ -242,6 +242,43 @@ model_PC2_vibe_soc_plot <- emmip(model_vibe_soc, ~ social_context_overall, CIs =
 ```
 
 
+### k-fold Cross Validation
+
+```{r}
+library(rsample)
+library(Metrics)
+
+set.seed(403)
+folds <- group_vfold_cv(ema_lead_clean, group = subject, v = 10)
+
+cv.error.location = rep(0, 10)
+cv.error.social = rep(0, 10)
+
+start.time <- Sys.time()
+
+for (i in 1:10){
+  train_data <- analysis(folds$splits[[i]])
+  test_data <- assessment(folds$splits[[i]])
+  
+  # Fit models on the training data
+  fit_loc <- lmer(PC2_Vibe ~ location + (1 | subject), data = train_data)
+  fit_soc <- lmer(PC2_Vibe ~ social_context_overall + (1 | subject), data = train_data)
+  
+  # Make predictions
+  pred_loc <- predict(fit_loc, newdata = test_data, allow.new.levels = TRUE)
+  pred_soc <- predict(fit_soc, newdata = test_data, allow.new.levels = TRUE)
+  
+  # Calculate errors
+  cv.error.location[i] = rmse(test_data$PC2_Vibe, pred_loc)
+  cv.error.social[i] = rmse(test_data$PC2_Vibe, pred_soc)
+}
+
+end.time <- Sys.time()
+print(end.time - start.time)
+
+print(paste("Location Error:", mean(cv.error.location)))
+print(paste("Social Error:", mean(cv.error.social)))
+```
 
 
 
